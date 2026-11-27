@@ -5,6 +5,7 @@ import PublicOnlyRoute from '../components/PublicOnlyRoute';
 import DashboardLayout from '../components/DashboardLayout';
 import LoginPage from '../pages/LoginPage';
 import RegisterPage from '../pages/RegisterPage';
+import ForgotPasswordPage from '../pages/ForgotPasswordPage';
 import DashboardPage from '../pages/DashboardPage';
 import ArchivePage from '../pages/ArchivePage';
 import TrashPage from '../pages/TrashPage';
@@ -24,6 +25,7 @@ export const AppRoutes = () => {
       <Route element={<PublicOnlyRoute />}>
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
+        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
       </Route>
 
       {/* Protected routes wrapped in DashboardLayout */}
