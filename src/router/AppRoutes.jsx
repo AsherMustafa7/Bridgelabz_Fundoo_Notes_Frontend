@@ -6,6 +6,8 @@ import DashboardLayout from '../components/DashboardLayout';
 import LoginPage from '../pages/LoginPage';
 import RegisterPage from '../pages/RegisterPage';
 import DashboardPage from '../pages/DashboardPage';
+import ArchivePage from '../pages/ArchivePage';
+import TrashPage from '../pages/TrashPage';
 
 // Placeholder for remaining routes
 const Placeholder = ({ title }) => (
@@ -28,8 +30,8 @@ export const AppRoutes = () => {
         <Route element={<DashboardLayout />}>
           <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="/reminders" element={<Placeholder title="Reminders" />} />
-          <Route path="/archive" element={<Placeholder title="Archive" />} />
-          <Route path="/trash" element={<Placeholder title="Trash" />} />
+          <Route path="/archive" element={<ArchivePage />} />
+          <Route path="/trash" element={<TrashPage />} />
           <Route path="/batch-import" element={<Placeholder title="Batch Import" />} />
         </Route>
       </Route>

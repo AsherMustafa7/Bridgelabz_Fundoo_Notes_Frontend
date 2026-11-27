@@ -790,3 +790,30 @@ body {
 @keyframes spin {
   to { transform: rotate(360deg); }
 }
+
+/* Archive & Trash views */
+.archive-page, .trash-page, .reminders-page, .batch-page {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.page-header {
+  margin-bottom: 8px;
+}
+
+.page-title {
+  font-size: 20px;
+  font-weight: 500;
+  color: var(--text-main);
+}
+
+.trash-header-banner {
+  text-align: center;
+  font-size: 13px;
+  color: var(--text-secondary);
+  padding: 12px;
+  background-color: #f1f3f4;
+  border-radius: 4px;
+}
