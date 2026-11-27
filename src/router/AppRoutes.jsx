@@ -10,13 +10,7 @@ import DashboardPage from '../pages/DashboardPage';
 import ArchivePage from '../pages/ArchivePage';
 import TrashPage from '../pages/TrashPage';
 import ReminderPage from '../pages/ReminderPage';
-
-// Placeholder for remaining routes
-const Placeholder = ({ title }) => (
-  <div style={{ padding: '2rem' }}>
-    <h2>{title}</h2>
-  </div>
-);
+import BatchImportPage from '../pages/BatchImportPage';
 
 export const AppRoutes = () => {
   return (
@@ -35,7 +29,7 @@ export const AppRoutes = () => {
           <Route path="/reminders" element={<ReminderPage />} />
           <Route path="/archive" element={<ArchivePage />} />
           <Route path="/trash" element={<TrashPage />} />
-          <Route path="/batch-import" element={<Placeholder title="Batch Import" />} />
+          <Route path="/batch-import" element={<BatchImportPage />} />
         </Route>
       </Route>
 
