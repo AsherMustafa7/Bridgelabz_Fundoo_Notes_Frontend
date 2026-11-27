@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import NoteEditor from '../components/NoteEditor';
 import NoteList from '../components/NoteList';
+import ReminderModal from '../components/ReminderModal';
 import {
   getAllNotes,
   createNote,
@@ -15,6 +16,8 @@ export const DashboardPage = () => {
   const [notes, setNotes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
+  const [activeReminderNote, setActiveReminderNote] = useState(null);
 
   const fetchNotes = useCallback(async () => {
     try {
@@ -107,6 +110,18 @@ export const DashboardPage = () => {
       <NoteEditor onAddNote={handleCreateNote} />
 
       {error && <div className="alert-banner alert-error">{error}</div>}
+      {successMessage && (
+        <div className="alert-banner alert-success">
+          {successMessage}
+          <button
+            type="button"
+            style={{ float: 'right', background: 'none', border: 'none', cursor: 'pointer' }}
+            onClick={() => setSuccessMessage('')}
+          >
+            ×
+          </button>
+        </div>
+      )}
 
       {loading ? (
         <div className="loading-state">
@@ -120,11 +135,20 @@ export const DashboardPage = () => {
           onTogglePin={handleTogglePin}
           onToggleArchive={handleToggleArchive}
           onToggleTrash={handleToggleTrash}
+          onOpenReminder={(note) => setActiveReminderNote(note)}
           emptyMessage={
             query
               ? `No notes matching "${query}"`
               : 'Notes you add appear here'
           }
+        />
+      )}
+
+      {activeReminderNote && (
+        <ReminderModal
+          note={activeReminderNote}
+          onClose={() => setActiveReminderNote(null)}
+          onSuccess={(msg) => setSuccessMessage(msg)}
         />
       )}
     </div>
