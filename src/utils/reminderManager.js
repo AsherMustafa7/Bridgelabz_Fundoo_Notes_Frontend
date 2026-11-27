@@ -1,6 +1,37 @@
 const STORAGE_KEY = 'fundoo_reminders';
 const DISMISSED_KEY = 'fundoo_reminders_dismissed';
 
+let globalAudioCtx = null;
+
+// Initialize and unlock audio context permanently for this browser tab
+export const initAudioContext = () => {
+  if (typeof window === 'undefined') return null;
+  try {
+    if (!globalAudioCtx) {
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if (AudioCtx) {
+        globalAudioCtx = new AudioCtx();
+      }
+    }
+    if (globalAudioCtx && globalAudioCtx.state === 'suspended') {
+      globalAudioCtx.resume().catch(() => {});
+    }
+  } catch (e) {
+    // Ignore audio init errors
+  }
+  return globalAudioCtx;
+};
+
+// Automatically listen for first click/tap to unlock browser audio policy
+if (typeof window !== 'undefined') {
+  const unlockAudioHandler = () => {
+    initAudioContext();
+  };
+  ['click', 'touchstart', 'keydown'].forEach((eventName) => {
+    window.addEventListener(eventName, unlockAudioHandler, { capture: true, passive: true });
+  });
+}
+
 export const getReminders = () => {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
@@ -11,6 +42,7 @@ export const getReminders = () => {
 };
 
 export const saveReminder = (noteId, reminderTime, noteTitle) => {
+  initAudioContext(); // Ensure audio is unlocked during the click
   const current = getReminders();
   current[noteId] = {
     noteId,
@@ -20,7 +52,7 @@ export const saveReminder = (noteId, reminderTime, noteTitle) => {
   };
   localStorage.setItem(STORAGE_KEY, JSON.stringify(current));
 
-  // Reset dismissed status when a new reminder is scheduled
+  // Reset dismissed status for this note
   const dismissed = getDismissedReminders();
   delete dismissed[noteId];
   localStorage.setItem(DISMISSED_KEY, JSON.stringify(dismissed));
@@ -85,44 +117,67 @@ export const triggerDesktopNotification = (title, body) => {
   }
 };
 
-// Play reliable pleasant dual-tone chime
+// Play an unmistakable 3-tone notification chime
 export const playReminderChime = () => {
+  const ctx = initAudioContext();
+  if (!ctx) return;
+
   try {
-    const AudioCtx = window.AudioContext || window.webkitAudioContext;
-    if (!AudioCtx) return;
-    const ctx = new AudioCtx();
-    
-    // Resume context if suspended
     if (ctx.state === 'suspended') {
-      ctx.resume();
+      ctx.resume().catch(() => {});
     }
 
-    const now = ctx.currentTime;
-    
-    // Note 1: E5 (659.25 Hz)
-    const osc1 = ctx.createOscillator();
-    const gain1 = ctx.createGain();
-    osc1.type = 'triangle';
-    osc1.frequency.setValueAtTime(659.25, now);
-    gain1.gain.setValueAtTime(0.2, now);
-    gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
-    osc1.connect(gain1);
-    gain1.connect(ctx.destination);
-    osc1.start(now);
-    osc1.stop(now + 0.35);
+    const playTone = (freq, startTime, duration, type = 'sine') => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
 
-    // Note 2: B5 (987.77 Hz)
-    const osc2 = ctx.createOscillator();
-    const gain2 = ctx.createGain();
-    osc2.type = 'sine';
-    osc2.frequency.setValueAtTime(987.77, now + 0.18);
-    gain2.gain.setValueAtTime(0.25, now + 0.18);
-    gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.65);
-    osc2.connect(gain2);
-    gain2.connect(ctx.destination);
-    osc2.start(now + 0.18);
-    osc2.stop(now + 0.65);
+      osc.type = type;
+      osc.frequency.setValueAtTime(freq, startTime);
+
+      gain.gain.setValueAtTime(0.3, startTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
+
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+
+      osc.start(startTime);
+      osc.stop(startTime + duration);
+    };
+
+    const now = ctx.currentTime;
+    // Chime Triad: C5 (523Hz), E5 (659Hz), G5 (784Hz)
+    playTone(523.25, now, 0.25, 'triangle');
+    playTone(659.25, now + 0.12, 0.25, 'sine');
+    playTone(783.99, now + 0.24, 0.5, 'sine');
   } catch (e) {
-    console.warn('Audio playback not allowed without user interaction', e);
+    console.warn('Audio playback error', e);
   }
+};
+
+// Compute human countdown
+export const getCountdownInfo = (reminderTime) => {
+  const target = new Date(reminderTime).getTime();
+  const now = Date.now();
+  const diffSec = Math.floor((target - now) / 1000);
+
+  if (diffSec <= 0) {
+    return { isDue: true, text: 'DUE NOW' };
+  }
+  if (diffSec < 60) {
+    return { isDue: false, text: `in ${diffSec}s` };
+  }
+  if (diffSec < 3600) {
+    const mins = Math.floor(diffSec / 60);
+    const secs = diffSec % 60;
+    return { isDue: false, text: `in ${mins}m ${secs}s` };
+  }
+  return {
+    isDue: false,
+    text: new Date(reminderTime).toLocaleString([], {
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    }),
+  };
 };
