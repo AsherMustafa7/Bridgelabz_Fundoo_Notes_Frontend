@@ -6,6 +6,8 @@ export const NoteCard = ({
   onToggleArchive,
   onToggleTrash,
   onOpenReminder,
+  reminderData,
+  onRemoveReminder,
   isTrashView = false,
 }) => {
   return (
@@ -29,6 +31,35 @@ export const NoteCard = ({
 
       <div className="note-card-content">
         <p className="note-card-description">{note.description}</p>
+
+        {reminderData && (
+          <div className="note-reminder-badge">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor">
+              <path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z" />
+            </svg>
+            <span>
+              {new Date(reminderData.reminderTime).toLocaleString([], {
+                month: 'short',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+              })}
+            </span>
+            {onRemoveReminder && (
+              <button
+                type="button"
+                className="btn-remove-reminder-chip"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onRemoveReminder(note.id);
+                }}
+                title="Remove reminder"
+              >
+                ×
+              </button>
+            )}
+          </div>
+        )}
       </div>
 
       <div className="note-card-footer">
@@ -37,9 +68,9 @@ export const NoteCard = ({
             {onOpenReminder && (
               <button
                 type="button"
-                className="btn-card-action"
+                className={`btn-card-action ${reminderData ? 'action-active' : ''}`}
                 onClick={() => onOpenReminder(note)}
-                title="Remind me"
+                title={reminderData ? 'Edit reminder' : 'Remind me'}
                 aria-label="Set reminder"
               >
                 <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">

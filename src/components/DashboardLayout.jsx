@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Outlet } from 'react-router-dom';
 import Navbar from './Navbar';
 import Sidebar from './Sidebar';
+import ReminderNotification from './ReminderNotification';
 
 export const DashboardLayout = () => {
   const [isSidebarExpanded, setIsSidebarExpanded] = useState(true);
@@ -24,6 +25,9 @@ export const DashboardLayout = () => {
           <Outlet context={{ searchQuery, setSearchQuery }} />
         </main>
       </div>
+
+      {/* Global Live Reminder Alert Listener */}
+      <ReminderNotification />
     </div>
   );
 };
