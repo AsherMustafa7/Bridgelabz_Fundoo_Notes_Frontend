@@ -5,14 +5,12 @@ import PublicOnlyRoute from '../components/PublicOnlyRoute';
 import DashboardLayout from '../components/DashboardLayout';
 import LoginPage from '../pages/LoginPage';
 import RegisterPage from '../pages/RegisterPage';
+import DashboardPage from '../pages/DashboardPage';
 
-// Temporary placeholder for dashboard view until Feature 5
-const DashboardPlaceholder = () => (
+// Placeholder for remaining routes
+const Placeholder = ({ title }) => (
   <div style={{ padding: '2rem' }}>
-    <h2>Welcome to Fundoo Notes</h2>
-    <p style={{ marginTop: '8px', color: '#5f6368' }}>
-      Select an option from the sidebar or start organizing your ideas.
-    </p>
+    <h2>{title}</h2>
   </div>
 );
 
@@ -28,11 +26,11 @@ export const AppRoutes = () => {
       {/* Protected routes wrapped in DashboardLayout */}
       <Route element={<ProtectedRoute />}>
         <Route element={<DashboardLayout />}>
-          <Route path="/dashboard" element={<DashboardPlaceholder />} />
-          <Route path="/reminders" element={<DashboardPlaceholder />} />
-          <Route path="/archive" element={<DashboardPlaceholder />} />
-          <Route path="/trash" element={<DashboardPlaceholder />} />
-          <Route path="/batch-import" element={<DashboardPlaceholder />} />
+          <Route path="/dashboard" element={<DashboardPage />} />
+          <Route path="/reminders" element={<Placeholder title="Reminders" />} />
+          <Route path="/archive" element={<Placeholder title="Archive" />} />
+          <Route path="/trash" element={<Placeholder title="Trash" />} />
+          <Route path="/batch-import" element={<Placeholder title="Batch Import" />} />
         </Route>
       </Route>
 
