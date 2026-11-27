@@ -1378,3 +1378,29 @@ body {
 .btn-alert-dismiss:hover {
   background-color: #f29900;
 }
+
+/* Live Countdown & Due Badges */
+.btn-preset-highlight {
+  background-color: #feefc3 !important;
+  color: #b06000 !important;
+  border-color: #f9ab00 !important;
+  font-weight: 600 !important;
+}
+
+.badge-pending {
+  background-color: #f1f3f4;
+  color: #3c4043;
+}
+
+.badge-due-now {
+  background-color: #fce8e6 !important;
+  color: #c5221f !important;
+  border-color: #ea4335 !important;
+  font-weight: 600;
+  animation: badgeBlink 1.5s infinite ease-in-out;
+}
+
+@keyframes badgeBlink {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.85; transform: scale(1.03); }
+}

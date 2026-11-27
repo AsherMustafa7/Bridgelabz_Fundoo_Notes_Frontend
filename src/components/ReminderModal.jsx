@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { createReminder } from '../services/reminderService';
-import { saveReminder } from '../utils/reminderManager';
+import { saveReminder, initAudioContext } from '../utils/reminderManager';
 
 export const ReminderModal = ({ note, onClose, onSuccess }) => {
   const [reminderTime, setReminderTime] = useState('');
@@ -9,26 +9,30 @@ export const ReminderModal = ({ note, onClose, onSuccess }) => {
 
   if (!note) return null;
 
-  // Helpers for preset times
-  const setPreset = (hoursFromNow) => {
-    const d = new Date(Date.now() + hoursFromNow * 3600 * 1000);
+  // Preset offset in seconds
+  const setPresetSeconds = (seconds) => {
+    initAudioContext();
+    const d = new Date(Date.now() + seconds * 1000);
     const pad = (n) => String(n).padStart(2, '0');
+    // Format YYYY-MM-DDTHH:mm:ss
     const formatted = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(
       d.getDate()
-    )}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+    )}T${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
     setReminderTime(formatted);
     setError('');
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    initAudioContext(); // Unlock audio on submit click
+
     if (!reminderTime) {
       setError('Please select a reminder time');
       return;
     }
 
     const selectedDate = new Date(reminderTime);
-    if (selectedDate <= new Date()) {
+    if (selectedDate.getTime() <= Date.now()) {
       setError('Reminder time must be in the future');
       return;
     }
@@ -36,8 +40,12 @@ export const ReminderModal = ({ note, onClose, onSuccess }) => {
     setLoading(true);
     setError('');
     try {
-      const isoTime =
-        reminderTime.length === 16 ? `${reminderTime}:00` : reminderTime;
+      // Ensure ISO format YYYY-MM-DDTHH:mm:ss for backend LocalDateTime
+      let isoTime = reminderTime;
+      if (isoTime.length === 16) {
+        isoTime = `${isoTime}:00`;
+      }
+
       // 1. Send event to RabbitMQ via Spring Boot backend
       await createReminder(note.id, isoTime);
 
@@ -46,7 +54,7 @@ export const ReminderModal = ({ note, onClose, onSuccess }) => {
 
       if (onSuccess) {
         onSuccess(
-          `Reminder scheduled for "${note.title || 'Untitled'}" at ${selectedDate.toLocaleString()}`
+          `Reminder scheduled for "${note.title || 'Untitled'}" at ${selectedDate.toLocaleTimeString()}`
         );
       }
       onClose();
@@ -80,47 +88,57 @@ export const ReminderModal = ({ note, onClose, onSuccess }) => {
         <div className="preset-buttons">
           <button
             type="button"
-            className="btn-preset"
-            onClick={() => setPreset(1 / 60)} // 1 minute from now for quick testing
-            title="Trigger in 1 minute"
+            className="btn-preset btn-preset-highlight"
+            onClick={() => setPresetSeconds(15)}
+            title="Triggers in exactly 15 seconds"
           >
-            Quick Test (+1 min)
+            ⚡ Test in 15 sec
           </button>
           <button
             type="button"
             className="btn-preset"
-            onClick={() => setPreset(4)}
+            onClick={() => setPresetSeconds(30)}
+            title="Triggers in 30 seconds"
+          >
+            +30 sec
+          </button>
+          <button
+            type="button"
+            className="btn-preset"
+            onClick={() => setPresetSeconds(60)}
+            title="Triggers in 1 minute"
+          >
+            +1 min
+          </button>
+          <button
+            type="button"
+            className="btn-preset"
+            onClick={() => setPresetSeconds(4 * 3600)}
           >
             Later today (+4h)
           </button>
           <button
             type="button"
             className="btn-preset"
-            onClick={() => setPreset(24)}
+            onClick={() => setPresetSeconds(24 * 3600)}
           >
-            Tomorrow (+24h)
-          </button>
-          <button
-            type="button"
-            className="btn-preset"
-            onClick={() => setPreset(168)}
-          >
-            Next week (+7d)
+            Tomorrow
           </button>
         </div>
 
         <form onSubmit={handleSubmit} className="modal-form">
           <div className="form-group">
-            <label htmlFor="reminderTime">Select Custom Date & Time</label>
+            <label htmlFor="reminderTime">Custom Date & Time</label>
             <input
               id="reminderTime"
               type="datetime-local"
+              step="1"
               value={reminderTime}
               onChange={(e) => {
                 setReminderTime(e.target.value);
                 setError('');
               }}
-              min={new Date().toISOString().slice(0, 16)}
+              min={new Date().toISOString().slice(0, 19)}
               disabled={loading}
               required
             />

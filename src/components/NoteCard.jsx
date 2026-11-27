@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { getCountdownInfo } from '../utils/reminderManager';
 
 export const NoteCard = ({
   note,
@@ -10,6 +11,25 @@ export const NoteCard = ({
   onRemoveReminder,
   isTrashView = false,
 }) => {
+  const [countdown, setCountdown] = useState(() =>
+    reminderData ? getCountdownInfo(reminderData.reminderTime) : null
+  );
+
+  useEffect(() => {
+    if (!reminderData) {
+      setCountdown(null);
+      return;
+    }
+
+    const updateTimer = () => {
+      setCountdown(getCountdownInfo(reminderData.reminderTime));
+    };
+
+    updateTimer();
+    const interval = setInterval(updateTimer, 1000);
+    return () => clearInterval(interval);
+  }, [reminderData]);
+
   return (
     <div className={`note-card ${note.pinned ? 'note-pinned' : ''}`}>
       <div className="note-card-header">
@@ -32,18 +52,17 @@ export const NoteCard = ({
       <div className="note-card-content">
         <p className="note-card-description">{note.description}</p>
 
-        {reminderData && (
-          <div className="note-reminder-badge">
+        {reminderData && countdown && (
+          <div
+            className={`note-reminder-badge ${
+              countdown.isDue ? 'badge-due-now' : 'badge-pending'
+            }`}
+          >
             <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor">
               <path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z" />
             </svg>
-            <span>
-              {new Date(reminderData.reminderTime).toLocaleString([], {
-                month: 'short',
-                day: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit',
-              })}
+            <span className="reminder-chip-text">
+              {countdown.isDue ? '🔔 Due Now' : `⏰ ${countdown.text}`}
             </span>
             {onRemoveReminder && (
               <button
