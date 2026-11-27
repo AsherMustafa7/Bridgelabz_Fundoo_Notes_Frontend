@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { createReminder } from '../services/reminderService';
+import { saveReminder } from '../utils/reminderManager';
 
 export const ReminderModal = ({ note, onClose, onSuccess }) => {
   const [reminderTime, setReminderTime] = useState('');
@@ -11,7 +12,6 @@ export const ReminderModal = ({ note, onClose, onSuccess }) => {
   // Helpers for preset times
   const setPreset = (hoursFromNow) => {
     const d = new Date(Date.now() + hoursFromNow * 3600 * 1000);
-    // Format to YYYY-MM-DDTHH:mm
     const pad = (n) => String(n).padStart(2, '0');
     const formatted = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(
       d.getDate()
@@ -36,13 +36,17 @@ export const ReminderModal = ({ note, onClose, onSuccess }) => {
     setLoading(true);
     setError('');
     try {
-      // Ensure ISO format YYYY-MM-DDTHH:mm:ss for backend LocalDateTime
       const isoTime =
         reminderTime.length === 16 ? `${reminderTime}:00` : reminderTime;
+      // 1. Send event to RabbitMQ via Spring Boot backend
       await createReminder(note.id, isoTime);
+
+      // 2. Register live alert in client reminder manager
+      saveReminder(note.id, isoTime, note.title);
+
       if (onSuccess) {
         onSuccess(
-          `Reminder set for "${note.title || 'Untitled'}" at ${selectedDate.toLocaleString()}`
+          `Reminder scheduled for "${note.title || 'Untitled'}" at ${selectedDate.toLocaleString()}`
         );
       }
       onClose();
@@ -74,6 +78,14 @@ export const ReminderModal = ({ note, onClose, onSuccess }) => {
         {error && <div className="alert-banner alert-error">{error}</div>}
 
         <div className="preset-buttons">
+          <button
+            type="button"
+            className="btn-preset"
+            onClick={() => setPreset(1 / 60)} // 1 minute from now for quick testing
+            title="Trigger in 1 minute"
+          >
+            Quick Test (+1 min)
+          </button>
           <button
             type="button"
             className="btn-preset"

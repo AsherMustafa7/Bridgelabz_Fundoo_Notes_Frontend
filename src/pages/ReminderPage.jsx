@@ -3,20 +3,27 @@ import { useOutletContext } from 'react-router-dom';
 import NoteCard from '../components/NoteCard';
 import ReminderModal from '../components/ReminderModal';
 import { getAllNotes, toggleArchive, toggleTrash, togglePin } from '../services/noteService';
+import { getReminders, removeReminder } from '../utils/reminderManager';
 
 export const ReminderPage = () => {
   const { searchQuery } = useOutletContext() || { searchQuery: '' };
   const [notes, setNotes] = useState([]);
+  const [reminders, setReminders] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
   const [activeReminderNote, setActiveReminderNote] = useState(null);
+
+  const refreshReminders = () => {
+    setReminders(getReminders());
+  };
 
   const fetchNotes = useCallback(async () => {
     try {
       setLoading(true);
       const data = await getAllNotes();
       setNotes(Array.isArray(data) ? data : []);
+      refreshReminders();
       setError('');
     } catch (err) {
       console.error('Failed to load notes for reminders', err);
@@ -67,24 +74,30 @@ export const ReminderPage = () => {
     }
   };
 
-  // Active notes eligible for reminders (not trashed)
-  const activeNotes = notes.filter((n) => !n.trashed);
+  const handleRemoveReminder = (noteId) => {
+    removeReminder(noteId);
+    refreshReminders();
+    setSuccessMessage('Reminder removed successfully');
+  };
+
+  // Only notes that have an active scheduled reminder in reminderManager
+  const reminderNotes = notes.filter((n) => !n.trashed && reminders[n.id]);
 
   const query = (searchQuery || '').trim().toLowerCase();
   const filteredNotes = query
-    ? activeNotes.filter(
+    ? reminderNotes.filter(
         (n) =>
           (n.title && n.title.toLowerCase().includes(query)) ||
           (n.description && n.description.toLowerCase().includes(query))
       )
-    : activeNotes;
+    : reminderNotes;
 
   return (
     <div className="reminders-page">
       <div className="page-header">
         <h2 className="page-title">Reminders</h2>
         <p className="page-subtext">
-          Schedule asynchronous note alerts handled by RabbitMQ message broker
+          Notes with active scheduled reminder alerts (backed by RabbitMQ broker and live browser notifications).
         </p>
       </div>
 
@@ -120,6 +133,8 @@ export const ReminderPage = () => {
             <NoteCard
               key={note.id}
               note={note}
+              reminderData={reminders[note.id]}
+              onRemoveReminder={handleRemoveReminder}
               onTogglePin={handleTogglePin}
               onToggleArchive={handleToggleArchive}
               onToggleTrash={handleToggleTrash}
@@ -133,7 +148,10 @@ export const ReminderPage = () => {
         <ReminderModal
           note={activeReminderNote}
           onClose={() => setActiveReminderNote(null)}
-          onSuccess={(msg) => setSuccessMessage(msg)}
+          onSuccess={(msg) => {
+            setSuccessMessage(msg);
+            refreshReminders();
+          }}
         />
       )}
     </div>

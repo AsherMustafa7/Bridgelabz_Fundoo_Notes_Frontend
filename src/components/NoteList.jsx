@@ -4,10 +4,12 @@ import NoteCard from './NoteCard';
 export const NoteList = ({
   pinnedNotes = [],
   otherNotes = [],
+  reminders = {},
   onTogglePin,
   onToggleArchive,
   onToggleTrash,
   onOpenReminder,
+  onRemoveReminder,
   emptyMessage = 'No notes available',
 }) => {
   const hasNotes = pinnedNotes.length > 0 || otherNotes.length > 0;
@@ -33,6 +35,8 @@ export const NoteList = ({
               <NoteCard
                 key={note.id}
                 note={note}
+                reminderData={reminders[note.id]}
+                onRemoveReminder={onRemoveReminder}
                 onTogglePin={onTogglePin}
                 onToggleArchive={onToggleArchive}
                 onToggleTrash={onToggleTrash}
@@ -53,6 +57,8 @@ export const NoteList = ({
               <NoteCard
                 key={note.id}
                 note={note}
+                reminderData={reminders[note.id]}
+                onRemoveReminder={onRemoveReminder}
                 onTogglePin={onTogglePin}
                 onToggleArchive={onToggleArchive}
                 onToggleTrash={onToggleTrash}

@@ -1162,3 +1162,101 @@ body {
 ::-webkit-scrollbar-thumb:hover {
   background: #bdc1c6;
 }
+
+/* Reminder Badge on NoteCard & Live Reminder Toast */
+.note-reminder-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background-color: #f1f3f4;
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+  padding: 3px 10px;
+  font-size: 11px;
+  color: #3c4043;
+  margin-top: 10px;
+  font-weight: 500;
+}
+
+.btn-remove-reminder-chip {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #80868b;
+  font-size: 14px;
+  padding: 0 2px;
+  line-height: 1;
+}
+
+.btn-remove-reminder-chip:hover {
+  color: var(--danger-color);
+}
+
+.live-reminder-container {
+  position: fixed;
+  top: 76px;
+  right: 20px;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-width: 360px;
+}
+
+.live-reminder-toast {
+  background-color: #ffffff;
+  border-left: 4px solid #1a73e8;
+  border-radius: 6px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2);
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.toast-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.toast-body {
+  flex: 1;
+}
+
+.toast-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-main);
+  margin-bottom: 2px;
+}
+
+.toast-text {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.btn-toast-dismiss {
+  background: none;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  color: #80868b;
+  padding: 0 4px;
+}
+
+.btn-toast-dismiss:hover {
+  color: var(--text-main);
+}

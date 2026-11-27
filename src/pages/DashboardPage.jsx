@@ -10,20 +10,27 @@ import {
   toggleArchive,
   toggleTrash,
 } from '../services/noteService';
+import { getReminders, removeReminder } from '../utils/reminderManager';
 
 export const DashboardPage = () => {
   const { searchQuery } = useOutletContext() || { searchQuery: '' };
   const [notes, setNotes] = useState([]);
+  const [reminders, setReminders] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
   const [activeReminderNote, setActiveReminderNote] = useState(null);
+
+  const refreshReminders = () => {
+    setReminders(getReminders());
+  };
 
   const fetchNotes = useCallback(async () => {
     try {
       setLoading(true);
       const data = await getAllNotes();
       setNotes(Array.isArray(data) ? data : []);
+      refreshReminders();
       setError('');
     } catch (err) {
       console.error('Failed to load notes', err);
@@ -89,6 +96,12 @@ export const DashboardPage = () => {
     }
   };
 
+  const handleRemoveReminder = (noteId) => {
+    removeReminder(noteId);
+    refreshReminders();
+    setSuccessMessage('Reminder removed');
+  };
+
   // Filter active notes (not trashed and not archived)
   const activeNotes = notes.filter((n) => !n.trashed && !n.archived);
 
@@ -132,6 +145,8 @@ export const DashboardPage = () => {
         <NoteList
           pinnedNotes={pinnedNotes}
           otherNotes={otherNotes}
+          reminders={reminders}
+          onRemoveReminder={handleRemoveReminder}
           onTogglePin={handleTogglePin}
           onToggleArchive={handleToggleArchive}
           onToggleTrash={handleToggleTrash}
@@ -148,7 +163,10 @@ export const DashboardPage = () => {
         <ReminderModal
           note={activeReminderNote}
           onClose={() => setActiveReminderNote(null)}
-          onSuccess={(msg) => setSuccessMessage(msg)}
+          onSuccess={(msg) => {
+            setSuccessMessage(msg);
+            refreshReminders();
+          }}
         />
       )}
     </div>
