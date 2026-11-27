@@ -8,6 +8,7 @@ import RegisterPage from '../pages/RegisterPage';
 import DashboardPage from '../pages/DashboardPage';
 import ArchivePage from '../pages/ArchivePage';
 import TrashPage from '../pages/TrashPage';
+import ReminderPage from '../pages/ReminderPage';
 
 // Placeholder for remaining routes
 const Placeholder = ({ title }) => (
@@ -29,7 +30,7 @@ export const AppRoutes = () => {
       <Route element={<ProtectedRoute />}>
         <Route element={<DashboardLayout />}>
           <Route path="/dashboard" element={<DashboardPage />} />
-          <Route path="/reminders" element={<Placeholder title="Reminders" />} />
+          <Route path="/reminders" element={<ReminderPage />} />
           <Route path="/archive" element={<ArchivePage />} />
           <Route path="/trash" element={<TrashPage />} />
           <Route path="/batch-import" element={<Placeholder title="Batch Import" />} />
