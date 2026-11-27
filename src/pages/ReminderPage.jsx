@@ -3,7 +3,13 @@ import { useOutletContext } from 'react-router-dom';
 import NoteCard from '../components/NoteCard';
 import ReminderModal from '../components/ReminderModal';
 import { getAllNotes, toggleArchive, toggleTrash, togglePin } from '../services/noteService';
-import { getReminders, removeReminder } from '../utils/reminderManager';
+import {
+  getReminders,
+  removeReminder,
+  requestNotificationPermission,
+  playReminderChime,
+  triggerDesktopNotification,
+} from '../utils/reminderManager';
 
 export const ReminderPage = () => {
   const { searchQuery } = useOutletContext() || { searchQuery: '' };
@@ -13,6 +19,11 @@ export const ReminderPage = () => {
   const [error, setError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
   const [activeReminderNote, setActiveReminderNote] = useState(null);
+  const [notificationStatus, setNotificationStatus] = useState(
+    typeof window !== 'undefined' && 'Notification' in window
+      ? Notification.permission
+      : 'unsupported'
+  );
 
   const refreshReminders = () => {
     setReminders(getReminders());
@@ -36,6 +47,28 @@ export const ReminderPage = () => {
   useEffect(() => {
     fetchNotes();
   }, [fetchNotes]);
+
+  const handleRequestPermission = async () => {
+    const res = await requestNotificationPermission();
+    setNotificationStatus(res);
+    if (res === 'granted') {
+      setSuccessMessage('Desktop notifications are now enabled!');
+      playReminderChime();
+      triggerDesktopNotification(
+        '🔔 Notifications Enabled',
+        'You will now receive desktop alerts for scheduled Fundoo reminders.'
+      );
+    }
+  };
+
+  const handleTestAlertNow = () => {
+    playReminderChime();
+    triggerDesktopNotification(
+      '🔔 Test Reminder Alert',
+      'This is how your Fundoo Notes reminder sounds and looks!'
+    );
+    setSuccessMessage('Test chime & desktop notification triggered!');
+  };
 
   const handleTogglePin = async (noteId) => {
     try {
@@ -80,7 +113,7 @@ export const ReminderPage = () => {
     setSuccessMessage('Reminder removed successfully');
   };
 
-  // Only notes that have an active scheduled reminder in reminderManager
+  // Only notes that have an active scheduled reminder
   const reminderNotes = notes.filter((n) => !n.trashed && reminders[n.id]);
 
   const query = (searchQuery || '').trim().toLowerCase();
@@ -95,10 +128,34 @@ export const ReminderPage = () => {
   return (
     <div className="reminders-page">
       <div className="page-header">
-        <h2 className="page-title">Reminders</h2>
-        <p className="page-subtext">
-          Notes with active scheduled reminder alerts (backed by RabbitMQ broker and live browser notifications).
-        </p>
+        <div className="page-header-row">
+          <div>
+            <h2 className="page-title">Reminders</h2>
+            <p className="page-subtext">
+              Active scheduled reminder alerts (backed by RabbitMQ broker and live browser notifications).
+            </p>
+          </div>
+
+          <div className="header-controls">
+            {notificationStatus !== 'granted' && (
+              <button
+                type="button"
+                className="btn btn-secondary btn-sm"
+                onClick={handleRequestPermission}
+              >
+                🔔 Enable Desktop Alerts
+              </button>
+            )}
+            <button
+              type="button"
+              className="btn btn-secondary btn-sm"
+              onClick={handleTestAlertNow}
+              title="Test chime and notification right now"
+            >
+              ▶ Test Alert Now
+            </button>
+          </div>
+        </div>
       </div>
 
       {error && <div className="alert-banner alert-error">{error}</div>}

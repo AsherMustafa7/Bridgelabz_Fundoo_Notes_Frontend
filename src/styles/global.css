@@ -1260,3 +1260,121 @@ body {
 .btn-toast-dismiss:hover {
   color: var(--text-main);
 }
+
+/* Prominent Alert Overlay & Controls */
+.page-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.header-controls {
+  display: flex;
+  gap: 8px;
+}
+
+.btn-sm {
+  padding: 6px 12px;
+  font-size: 12px;
+}
+
+.prominent-alert-overlay {
+  position: fixed;
+  top: 74px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 999999;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 90%;
+  max-width: 520px;
+  pointer-events: none;
+}
+
+.prominent-alert-card {
+  pointer-events: auto;
+  background: #202124;
+  color: #ffffff;
+  border-radius: 8px;
+  padding: 16px 20px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  border-left: 5px solid #f9ab00;
+  animation: dropDown 0.35s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+}
+
+@keyframes dropDown {
+  from {
+    transform: translateY(-40px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.alert-bell-pulse {
+  background-color: #f9ab00;
+  border-radius: 50%;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  animation: bellRing 1.5s infinite;
+}
+
+@keyframes bellRing {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.08); }
+}
+
+.alert-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.alert-badge-top {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #f9ab00;
+  font-weight: 600;
+}
+
+.alert-note-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+.alert-desc {
+  font-size: 13px;
+  color: #bdc1c6;
+}
+
+.btn-alert-dismiss {
+  background-color: #f9ab00;
+  color: #202124;
+  font-weight: 600;
+  font-size: 13px;
+  padding: 8px 18px;
+  border-radius: 4px;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.15s;
+  white-space: nowrap;
+}
+
+.btn-alert-dismiss:hover {
+  background-color: #f29900;
+}
