@@ -8,7 +8,6 @@ export const ForgotPasswordPage = () => {
   const [step, setStep] = useState(1); // 1 = enter email, 2 = enter otp
   const [email, setEmail] = useState('');
   const [otp, setOtp] = useState('');
-  const [receivedOtp, setReceivedOtp] = useState('');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
@@ -26,9 +25,8 @@ export const ForgotPasswordPage = () => {
     setSuccess('');
 
     try {
-      const data = await generateOtp(email.trim());
-      setReceivedOtp(data.otp);
-      setSuccess(`OTP successfully generated via Redis! (Valid for 5 mins)`);
+      await generateOtp(email.trim());
+      setSuccess(`An OTP has been sent to ${email.trim()}. Please check your inbox.`);
       setStep(2);
     } catch (err) {
       const msg =
@@ -44,7 +42,7 @@ export const ForgotPasswordPage = () => {
   const handleVerifyOtp = async (e) => {
     e.preventDefault();
     if (!otp.trim()) {
-      setError('Please enter the OTP received');
+      setError('Please enter the OTP received in your email');
       return;
     }
 
@@ -85,21 +83,13 @@ export const ForgotPasswordPage = () => {
           <h2>{step === 1 ? 'Find your email' : 'Verify OTP'}</h2>
           <p className="auth-subtext">
             {step === 1
-              ? 'Enter your registered email to receive a Redis-backed OTP'
-              : `Enter the code generated for ${email}`}
+              ? 'Enter your registered email to receive an OTP'
+              : `Enter the 6-digit code sent to ${email}`}
           </p>
         </div>
 
         {error && <div className="alert-banner alert-error">{error}</div>}
         {success && <div className="alert-banner alert-success">{success}</div>}
-
-        {/* Demo banner highlighting the generated OTP from Redis */}
-        {receivedOtp && step === 2 && (
-          <div className="otp-demo-badge">
-            <span className="otp-label">Redis Cache Active OTP:</span>
-            <span className="otp-code">{receivedOtp}</span>
-          </div>
-        )}
 
         {step === 1 ? (
           <form onSubmit={handleSendOtp} className="auth-form" noValidate>
@@ -128,7 +118,7 @@ export const ForgotPasswordPage = () => {
                 className="btn btn-primary"
                 disabled={loading}
               >
-                {loading ? 'Generating...' : 'Get OTP'}
+                {loading ? 'Sending...' : 'Send OTP'}
               </button>
             </div>
           </form>
