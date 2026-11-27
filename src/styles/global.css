@@ -1093,3 +1093,72 @@ body {
   background-color: #e8f0fe;
   color: #1a73e8;
 }
+
+/* ========================================================
+   Mobile Responsiveness & UI Polish
+   ======================================================== */
+
+@media (max-width: 768px) {
+  .navbar-left {
+    min-width: auto;
+  }
+
+  .navbar-brand-text {
+    display: none;
+  }
+
+  .navbar-center {
+    margin: 0 8px;
+  }
+
+  .sidebar-root {
+    position: fixed;
+    z-index: 1200;
+    box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+  }
+
+  .sidebar-collapsed {
+    transform: translateX(-100%);
+    width: var(--sidebar-width);
+  }
+
+  .content-margin-expanded,
+  .content-margin-collapsed {
+    margin-left: 0;
+  }
+
+  .layout-content {
+    padding: 16px;
+  }
+
+  .auth-card {
+    padding: 24px;
+  }
+
+  .notes-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .batch-cards-container {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #dadce0;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #bdc1c6;
+}
